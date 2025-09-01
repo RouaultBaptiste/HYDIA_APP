@@ -1,0 +1,21 @@
+# Supabase Configuration pour Backendhydia/.env
+
+# URL Supabase (à extraire du projet)
+SUPABASE_URL=https://ixgncrblmyjvctrtdula.supabase.co
+
+# Clé anonyme (pour le client frontend)
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4Z25jcmJsbXlqdmN0cnRkdWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3MTU5MTIsImV4cCI6MjA2OTI5MTkxMn0.2_iHWilZF_vH9Lv-eHXVuCcP9sAqEMooOGTKRd8F_K4
+
+# Clé service role (pour le backend)
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4Z25jcmJsbXlqdmN0cnRkdWxhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzcxNTkxMiwiZXhwIjoyMDY5MjkxOTEyfQ.-EaUGOoH2yGnq8YEfgerYrL3zObhmjjpQMpeq0X40BI
+
+# Autres configurations importantes à conserver dans votre .env
+# Serveur / URLs / CORS
+FRONTEND_URL=http://localhost:8082
+BACKEND_URL=http://localhost:3000
+CORS_ORIGIN=http://localhost:3001,http://localhost:3000,http://localhost:8082
+SESSION_COOKIE_DOMAIN=localhost
+LOG_LEVEL=debug
+
+# Session/Cookies
+SESSION_COOKIE_NAME=hydia_sess

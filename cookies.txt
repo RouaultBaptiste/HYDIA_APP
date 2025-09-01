@@ -1,0 +1,3 @@
+hydia_sess_access=mock-access-token-antoine-user-id-456-1756754203695; Max-Age=900; Domain=localhost; Path=/; Expires=Mon, 01 Sep 2025 19:31:43 GMT; HttpOnly; SameSite=Lax
+hydia_sess_refresh=mock-refresh-token-antoine-user-id-456-1756754203695; Max-Age=2592000; Domain=localhost; Path=/api/v1/auth; Expires=Wed, 01 Oct 2025 19:16:43 GMT; HttpOnly; SameSite=Lax
+hydia_sess_org=antoine-org-id-456; Max-Age=43200; Domain=localhost; Path=/; Expires=Tue, 02 Sep 2025 07:16:43 GMT; HttpOnly; SameSite=Lax

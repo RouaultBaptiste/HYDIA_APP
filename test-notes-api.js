@@ -1,61 +1,125 @@
-const fetch = require('node-fetch');
+// Test de l'API des notes avec authentification intégrée
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const fs = require('fs');
 
 // Configuration
-const API_URL = 'http://localhost:3000/api/v1';
-const COOKIES_FILE = './cookies.txt';
+const API_URL = 'http://localhost:3001/api/v1';
+const FRONTEND_URL = 'http://localhost:8082';
 
-// Lire les cookies d'authentification
-const getCookies = () => {
-  try {
-    const cookieFileContent = fs.readFileSync(COOKIES_FILE, 'utf8');
-    // Le fichier contient déjà les cookies au format correct
-    // Chaque ligne est un cookie complet
-    const cookieLines = cookieFileContent.split('\n').filter(line => line.trim() !== '');
-    
-    // Extraire juste la partie nom=valeur de chaque cookie
-    const cookies = cookieLines.map(line => {
-      const cookiePart = line.split(';')[0].trim();
-      return cookiePart;
-    });
-    
-    return cookies.join('; ');
-  } catch (error) {
-    console.error('Erreur lors de la lecture des cookies:', error);
-    return '';
-  }
+// Utilisateur de test
+const testUser = {
+  email: 'Antoineronold@proton.me',
+  password: 'Antoineronold@proton.me'
 };
 
-// Fonction utilitaire pour les requêtes API
-const apiRequest = async (endpoint, method = 'GET', body = null) => {
-  const cookies = getCookies();
+// Variable pour stocker les cookies de session
+let sessionCookies = [];
+
+// Variable pour stocker le token JWT extrait des cookies
+let jwtToken = null;
+
+// Fonction d'authentification pour obtenir les cookies
+async function authenticate() {
+  console.log('🔑 Authentification en cours...');
   
-  console.log(`Envoi requête ${method} ${endpoint}`);
-  console.log('Cookies utilisés:', cookies);
+  try {
+    const loginResponse = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Origin': FRONTEND_URL
+      },
+      body: JSON.stringify({
+        email: testUser.email,
+        password: testUser.password
+      }),
+      redirect: 'manual',
+      credentials: 'include'
+    });
+    
+    console.log(`Status: ${loginResponse.status}`);
+    
+    // Récupérer les cookies de la réponse
+    sessionCookies = loginResponse.headers.raw()['set-cookie'] || [];
+    
+    if (sessionCookies.length > 0) {
+      console.log(`✅ Authentification réussie, ${sessionCookies.length} cookies reçus`);
+      
+      // Afficher les cookies pour débogage
+      sessionCookies.forEach((cookie, index) => {
+        console.log(`Cookie ${index + 1}:`, cookie);
+      });
+      
+      // Extraire le token JWT du cookie d'accès
+      const accessCookie = sessionCookies.find(cookie => cookie.startsWith('hydia_sess_access='));
+      if (accessCookie) {
+        jwtToken = accessCookie.split('=')[1].split(';')[0];
+        console.log('Token JWT extrait:', jwtToken.substring(0, 20) + '...');
+      }
+      
+      return true;
+    } else {
+      console.log('❌ Authentification échouée: aucun cookie reçu');
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'authentification:', error);
+    return false;
+  }
+}
+
+// Fonction utilitaire pour les requêtes API avec cookies d'authentification
+async function apiRequest(endpoint, method = 'GET', body = null) {
+  console.log(`📡 Envoi requête ${method} ${endpoint}`);
   
   const options = {
     method,
     headers: {
       'Content-Type': 'application/json',
-      'Cookie': cookies
-    }
+      'Origin': FRONTEND_URL
+    },
+    credentials: 'include'
   };
-
+  
+  // Ne pas utiliser les cookies pour ce test, uniquement l'en-tête Authorization
+  console.log('⚠️ Test sans cookies, uniquement avec l\'en-tête Authorization');
+  // Commenté pour tester uniquement avec Authorization
+  /*
+  if (sessionCookies.length > 0) {
+    // Extraire uniquement la partie nom=valeur de chaque cookie
+    const simpleCookies = sessionCookies.map(cookie => {
+      const cookiePart = cookie.split(';')[0].trim();
+      return cookiePart;
+    });
+    
+    options.headers['Cookie'] = simpleCookies.join('; ');
+    console.log('🍪 Cookies utilisés pour l\'authentification');
+    console.log('En-tête Cookie simplifié:', options.headers['Cookie']);
+  }
+  */
+  
+  // Ajouter l'en-tête Authorization avec le token JWT
+  if (jwtToken) {
+    options.headers['Authorization'] = `Bearer ${jwtToken}`;
+    console.log('📝 En-tête Authorization ajouté avec le token JWT');
+  }
+  
   if (body) {
     options.body = JSON.stringify(body);
-    console.log('Body:', JSON.stringify(body, null, 2));
+    console.log('Body:', JSON.stringify(body));
   }
-
+  
   try {
     console.log(`URL complète: ${API_URL}${endpoint}`);
+    console.log('En-têtes:', JSON.stringify(options.headers));
+    
     const response = await fetch(`${API_URL}${endpoint}`, options);
-    console.log(`Statut de la réponse: ${response.status}`);
+    console.log(`Status: ${response.status}`);
     
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
       const data = await response.json();
-      console.log('Réponse:', JSON.stringify(data, null, 2).substring(0, 500) + '...');
-      
+      console.log('Réponse:', JSON.stringify(data).substring(0, 200) + '...');
       return {
         status: response.status,
         data,
@@ -63,8 +127,7 @@ const apiRequest = async (endpoint, method = 'GET', body = null) => {
       };
     } else {
       const text = await response.text();
-      console.log('Réponse (texte):', text.substring(0, 500) + '...');
-      
+      console.log('Réponse (texte):', text.substring(0, 200) + '...');
       return {
         status: response.status,
         data: { text },
@@ -72,18 +135,18 @@ const apiRequest = async (endpoint, method = 'GET', body = null) => {
       };
     }
   } catch (error) {
-    console.error(`Erreur lors de la requête ${method} ${endpoint}:`, error);
+    console.error(`❌ Erreur lors de la requête ${method} ${endpoint}:`, error);
     return {
       status: 500,
       data: { error: error.message },
       success: false
     };
   }
-};
+}
 
 // Tests pour les routes de notes
-const testNoteRoutes = async () => {
-  console.log('=== TESTS DES ROUTES API DE NOTES ===');
+async function testNoteRoutes() {
+  console.log('\n=== TESTS DES ROUTES API DE NOTES ===');
   
   let createdNoteId;
   let createdCategoryId;
@@ -250,7 +313,24 @@ const testNoteRoutes = async () => {
   console.log('\n=== TESTS TERMINÉS ===');
 };
 
+
+// Fonction principale qui exécute l'authentification puis les tests
+async function runTests() {
+  console.log('=== TEST DE L\'API DES NOTES AVEC AUTHENTIFICATION INTÉGRÉE ===');
+  
+  // 1. Authentification pour obtenir les cookies
+  const authSuccess = await authenticate();
+  
+  if (authSuccess) {
+    console.log('\n✅ Authentification réussie, exécution des tests de notes...');
+    await testNoteRoutes();
+    console.log('\n=== TESTS TERMINÉS ===');
+  } else {
+    console.log('\n❌ Échec de l\'authentification, tests de notes annulés.');
+  }
+}
+
 // Exécuter les tests
-testNoteRoutes().catch(error => {
-  console.error('Erreur lors de l\'exécution des tests:', error);
+runTests().catch(error => {
+  console.error('\n❌ Erreur lors de l\'exécution des tests:', error);
 });

@@ -1,0 +1,19 @@
+=== TESTS DES ROUTES API DE NOTES ===
+
+1. Récupération des organisations...
+Envoi requête GET /organizations
+Cookies utilisés: hydia_sess_access=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyN2E4OTFlZi00MjJhLTQ5YzQtYjllZC0wZjU2MjQ5ZDM0NDIiLCJlbWFpbCI6ImFudG9pbmVyb25vbGRAcHJvdG9uLm1lIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc1NjgwMzYyMywiZXhwIjoxNzU2ODA0NTIzfQ.FAJL4UiBFAqXnjBLVCzyQDR-w7FD16JwK3RgvsCgHQQ; hydia_sess_refresh=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyN2E4OTFlZi00MjJhLTQ5YzQtYjllZC0wZjU2MjQ5ZDM0NDIiLCJlbWFpbCI6ImFudG9pbmVyb25vbGRAcHJvdG9uLm1lIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NTY4MDM2MjMsImV4cCI6MTc1OTM5NTYyM30.Mq8DoR2OOFA5iitdn3Tg61C0aUbv_ev4UT3KMBI3ELs; hydia_sess_org=11111111-2222-3333-4444-555555555555
+URL complète: http://localhost:3001/api/v1/organizations
+Statut de la réponse: 401
+Réponse: {
+  "success": false,
+  "error": {
+    "type": "INTERNAL",
+    "message": "Token invalide",
+    "statusCode": 401,
+    "timestamp": "2025-09-02T09:02:00.912Z",
+    "path": "/api/v1/organizations",
+    "requestId": "req_1756803720911_y78gfrexymn"
+  }
+}...
+❌ Aucune organisation trouvée

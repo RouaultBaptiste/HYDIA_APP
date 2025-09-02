@@ -3,7 +3,7 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 const fs = require('fs');
 
 // Configuration
-const API_URL = 'http://localhost:3000/api/v1';
+const API_URL = 'http://localhost:3001/api/v1';
 const USERS = [
   {
     email: 'test@example.com',

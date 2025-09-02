@@ -11,7 +11,7 @@ const testUser = {
 };
 
 // Configuration
-const API_URL = 'http://localhost:3000/api/v1';
+const API_URL = 'http://localhost:3001/api/v1';
 const FRONTEND_URL = 'http://localhost:8082';
 
 async function testAuthentication() {
